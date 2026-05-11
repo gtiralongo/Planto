@@ -64,10 +64,16 @@
           <button class="nav-btn" data-view="catalog" onclick="showView('catalog')">🌿 Catálogo</button>
           <button class="nav-btn" data-view="plantings" onclick="showView('plantings')" id="navCultivosBtn">🌱 Cultivos</button>
           <button class="nav-btn" data-view="plan" onclick="showView('plan')">📋 Plan</button>
-          <button class="nav-btn" data-view="add" onclick="showView('add')">➕ Agregar</button>
+        </nav>
+        <!-- Bottom nav (mobile) -->
+        <nav class="nav-bottom" id="navBottom">
+          <button class="nav-bottom-btn active" data-view="calendar" onclick="showView('calendar')">📅<span>Calendario</span></button>
+          <button class="nav-bottom-btn" data-view="catalog" onclick="showView('catalog')">🌿<span>Catálogo</span></button>
+          <button class="nav-bottom-btn" data-view="plantings" onclick="showView('plantings')" id="navCultivosBottom">🌱<span>Cultivos</span></button>
+          <button class="nav-bottom-btn" data-view="plan" onclick="showView('plan')">📋<span>Plan</span></button>
         </nav>
         <div class="header-right">
-          <div id="userInfo" class="user-info hidden">
+          <div id="userInfo" class="user-info hidden" onclick="toggleUserDropdown(event)">
             <img id="userAvatar" class="user-avatar" src="" alt="avatar">
             <span id="userName" class="user-name"></span>
           </div>
@@ -75,9 +81,30 @@
           <button class="btn btn-logout hidden" id="logoutBtn" onclick="logout()" title="Cerrar sesión">🚪</button>
           <button class="icon-btn" onclick="toggleHemisphere()" title="Cambiar hemisferio">🔄</button>
           <button class="icon-btn" id="toggleTheme" onclick="toggleTheme()" title="Modo oscuro">🌙</button>
+          <button class="icon-btn hidden" id="menuUserBtn" onclick="toggleUserDropdown(event)" title="Menú">👤</button>
         </div>
       </div>
     </header>
+
+    <!-- User dropdown (mobile) -->
+    <div id="userDropdown" class="user-dropdown hidden">
+      <div class="dropdown-header hidden" id="dropdownUserInfo">
+        <img id="dropdownAvatar" class="dropdown-avatar" src="" alt="">
+        <span id="dropdownName"></span>
+      </div>
+      <div class="dropdown-item hidden" id="dropdownLoginItem" onclick="loginGoogle();document.getElementById('userDropdown').classList.add('hidden')">
+        🔑 Iniciar sesión
+      </div>
+      <div class="dropdown-item" onclick="toggleTheme()">
+        <span id="dropdownThemeIcon">🌙</span> <span id="dropdownThemeText">Modo oscuro</span>
+      </div>
+      <div class="dropdown-item" onclick="toggleHemisphere()">
+        🔄 Cambiar hemisferio <span class="dropdown-hemi" id="dropdownHemi"></span>
+      </div>
+      <div class="dropdown-item hidden" id="dropdownLogout" onclick="logout();document.getElementById('userDropdown').classList.add('hidden')">
+        🚪 Cerrar sesión
+      </div>
+    </div>
 
     <!-- CONTENIDO -->
     <main class="main">
@@ -97,7 +124,10 @@
       <!-- VISTA: Catálogo -->
       <section id="view-catalog" class="view">
         <div class="catalog-header">
-          <h2>Catálogo de Plantas</h2>
+          <div class="catalog-header-top">
+            <h2>Catálogo de Plantas</h2>
+            <button class="btn btn-add-plant" onclick="showView('add')">➕ Agregar planta</button>
+          </div>
           <div class="catalog-controls">
             <input type="text" id="searchInput" class="search-input" placeholder="Buscar planta..." oninput="filterPlants()">
             <select id="filterCategory" class="filter-select" onchange="filterPlants()">

@@ -56,7 +56,14 @@ function actualizarUIAuth() {
   const landingLoginBtn = document.getElementById('landingLoginBtn');
 
   const cultivosBtn = document.getElementById('navCultivosBtn');
+  const cultivosBottom = document.getElementById('navCultivosBottom');
   const plantingsView = document.getElementById('view-plantings');
+  const dropdownUserInfo = document.getElementById('dropdownUserInfo');
+  const dropdownAvatar = document.getElementById('dropdownAvatar');
+  const dropdownName = document.getElementById('dropdownName');
+  const dropdownLogout = document.getElementById('dropdownLogout');
+  const dropdownLoginItem = document.getElementById('dropdownLoginItem');
+  const menuUserBtn = document.getElementById('menuUserBtn');
 
   if (!loginBtn) return;
 
@@ -66,15 +73,27 @@ function actualizarUIAuth() {
     userInfo.classList.remove('hidden');
     userAvatar.src = currentUser.photoURL || '';
     userName.textContent = currentUser.displayName || 'Usuario';
+    if (dropdownUserInfo) dropdownUserInfo.classList.remove('hidden');
+    if (dropdownAvatar) dropdownAvatar.src = currentUser.photoURL || '';
+    if (dropdownName) dropdownName.textContent = currentUser.displayName || 'Usuario';
+    if (dropdownLogout) dropdownLogout.classList.remove('hidden');
+    if (dropdownLoginItem) dropdownLoginItem.classList.add('hidden');
+    if (menuUserBtn) menuUserBtn.classList.remove('hidden');
     if (landingLoginBtn) landingLoginBtn.classList.add('hidden');
     if (cultivosBtn) cultivosBtn.classList.remove('hidden');
+    if (cultivosBottom) cultivosBottom.classList.remove('hidden');
     if (plantingsView) plantingsView.classList.remove('hidden');
   } else {
     loginBtn.classList.remove('hidden');
     logoutBtn.classList.add('hidden');
     userInfo.classList.add('hidden');
+    if (dropdownUserInfo) dropdownUserInfo.classList.add('hidden');
+    if (dropdownLogout) dropdownLogout.classList.add('hidden');
+    if (dropdownLoginItem) dropdownLoginItem.classList.remove('hidden');
+    if (menuUserBtn) menuUserBtn.classList.remove('hidden');
     if (landingLoginBtn) landingLoginBtn.classList.remove('hidden');
     if (cultivosBtn) cultivosBtn.classList.add('hidden');
+    if (cultivosBottom) cultivosBottom.classList.add('hidden');
     if (plantingsView) plantingsView.classList.add('hidden');
   }
 }

@@ -55,12 +55,34 @@ function enterApp() {
   }
 }
 
+function toggleUserDropdown(e) {
+  e && e.stopPropagation();
+  const d = document.getElementById('userDropdown');
+  d.classList.toggle('hidden');
+  document.getElementById('dropdownHemi').textContent = hemisferio === 'norte' ? '🌍 Norte' : '🌏 Sur';
+  document.getElementById('dropdownThemeIcon').textContent = document.getElementById('toggleTheme').textContent;
+  document.getElementById('dropdownThemeText').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo claro' : 'Modo oscuro';
+}
+
+// Cerrar dropdown al tocar fuera
+document.addEventListener('click', (e) => {
+  const d = document.getElementById('userDropdown');
+  const ui = document.getElementById('userInfo');
+  const mb = document.getElementById('menuUserBtn');
+  if (d && !d.classList.contains('hidden') && !d.contains(e.target) && !ui.contains(e.target) && !mb.contains(e.target)) {
+    d.classList.add('hidden');
+  }
+});
+
 function showView(vista) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn, .nav-bottom-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(`view-${vista}`).classList.add('active');
   const btn = document.querySelector(`.nav-btn[data-view="${vista}"]`);
   if (btn) btn.classList.add('active');
+  const btnBottom = document.querySelector(`.nav-bottom-btn[data-view="${vista}"]`);
+  if (btnBottom) btnBottom.classList.add('active');
+  document.getElementById('userDropdown').classList.add('hidden');
   if (vista === 'calendar') renderCalendar();
   if (vista === 'catalog') filterPlants();
   if (vista === 'plantings') {

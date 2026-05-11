@@ -8,8 +8,15 @@ function renderCalendar() {
   grid.innerHTML = '';
   const mesActual = new Date().getMonth() + 1;
 
-  MESES.forEach((nombre, i) => {
-    const mes = i + 1;
+  // Reordenar meses para que el actual aparezca primero
+  const mesesOrdenados = [];
+  for (let i = 0; i < 12; i++) {
+    const m = ((mesActual - 1 + i) % 12) + 1;
+    mesesOrdenados.push({ indice: m - 1, mes: m });
+  }
+
+  mesesOrdenados.forEach(({ indice, mes }) => {
+    const nombre = MESES[indice];
     const plantasDelMes = getPlantasPorMes(mes);
     const esActual = mes === mesActual;
 
@@ -54,4 +61,8 @@ function renderCalendar() {
     monthDiv.appendChild(plantsDiv);
     grid.appendChild(monthDiv);
   });
+
+  // Scroll al mes actual
+  const el = grid.querySelector('.current-month');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
