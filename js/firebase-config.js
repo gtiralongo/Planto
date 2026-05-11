@@ -51,6 +51,11 @@ function initFirebase() {
         _authResolved = true;
         _authUser = user;
         if (typeof _onAuthReady === 'function') _onAuthReady(user);
+        // Si ya estaba en la app, cambiar a Mis Cultivos
+        const landing = document.getElementById('landing');
+        if (landing && landing.classList.contains('hidden') && typeof showView === 'function') {
+          showView('plantings');
+        }
       } else {
         _authResolved = true;
         _authUser = null;

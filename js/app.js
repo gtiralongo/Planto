@@ -123,6 +123,7 @@ if (typeof setOnAuthReady === 'function') {
     const landing = document.getElementById('landing');
     if (landing && !landing.classList.contains('hidden')) {
       enterApp();
+      showView('plantings');
     }
   });
 }
