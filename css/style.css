@@ -573,6 +573,114 @@ body {
   box-shadow: var(--shadow);
 }
 
+/* PLAN VIEW */
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.plan-header h2 { font-size: 1.5rem; color: var(--primary-dark); }
+
+.plan-section {
+  margin-bottom: 2rem;
+}
+
+.plan-section h3 {
+  font-size: 1.1rem;
+  color: var(--primary-dark);
+  margin-bottom: 0.75rem;
+}
+
+.plan-sub { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.plan-rec-card .badge-creciendo { font-size: 0.65rem; margin-top: 0.25rem; }
+
+.plan-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 1.5rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.plan-cosechas { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.progress-bar {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.3rem;
+  max-width: 200px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--primary);
+  transition: width 0.5s ease;
+}
+
+.progress-fill.fill-soon { background: var(--accent); }
+.progress-fill.fill-ready { background: #e53935; }
+
+.plan-resumen { margin-top: 0.5rem; }
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.resumen-item {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.resumen-num {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 0.25rem;
+}
+
+/* SMART PLANTING FORM */
+.planting-plan-info, .planting-estimacion {
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.plan-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.plan-info-row:last-child { margin-bottom: 0; }
+
 .plantings-empty {
   text-align: center;
   color: var(--text-secondary);

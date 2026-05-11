@@ -42,6 +42,9 @@ function enterApp() {
   renderCalendar();
   renderCatalog();
   renderPlantings('creciendo');
+  renderPlan();
+
+  setTimeout(() => mostrarNotificaciones(), 1500);
 
   const temaGuardado = localStorage.getItem('planto_theme');
   if (temaGuardado === 'dark') {
@@ -62,6 +65,7 @@ function showView(vista) {
     const activeTab = document.querySelector('.plantings-tab.active');
     renderPlantings(activeTab ? activeTab.dataset.tab : 'creciendo');
   }
+  if (vista === 'plan') renderPlan();
   if (vista === 'add') cancelEdit();
 }
 

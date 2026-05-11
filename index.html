@@ -63,6 +63,7 @@
           <button class="nav-btn active" data-view="calendar" onclick="showView('calendar')">📅 Calendario</button>
           <button class="nav-btn" data-view="catalog" onclick="showView('catalog')">🌿 Catálogo</button>
           <button class="nav-btn" data-view="plantings" onclick="showView('plantings')" id="navCultivosBtn">🌱 Cultivos</button>
+          <button class="nav-btn" data-view="plan" onclick="showView('plan')">📋 Plan</button>
           <button class="nav-btn" data-view="add" onclick="showView('add')">➕ Agregar</button>
         </nav>
         <div class="header-right">
@@ -218,6 +219,27 @@
         <div id="plantingsGrid" class="plantings-grid"></div>
       </section>
 
+      <!-- VISTA: Plan -->
+      <section id="view-plan" class="view">
+        <div class="plan-header">
+          <h2>📋 Plan de Siembra</h2>
+          <span class="badge-hemisphere" id="planBadgeEstacion"></span>
+        </div>
+        <div class="plan-section">
+          <h3>🌱 Qué plantar ahora</h3>
+          <p class="plan-sub" id="planEstacionTexto"></p>
+          <div id="planRecomendaciones" class="plan-grid"></div>
+        </div>
+        <div class="plan-section">
+          <h3>🍂 Próximas cosechas</h3>
+          <div id="planProximasCosechas" class="plan-cosechas"></div>
+        </div>
+        <div class="plan-section">
+          <h3>📊 Resumen de tus cultivos</h3>
+          <div id="planResumen" class="plan-resumen"></div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -240,12 +262,14 @@
         <form id="plantingForm" class="plant-form" onsubmit="guardarPlanting(event)">
           <div class="form-group">
             <label for="plantingSelect">Planta</label>
-            <select id="plantingSelect" required></select>
+            <select id="plantingSelect" required onchange="onPlantingSelectChange()"></select>
           </div>
+          <div id="plantingInfo" class="planting-plan-info hidden"></div>
           <div class="form-group">
             <label for="plantingFecha">Fecha de siembra</label>
-            <input type="date" id="plantingFecha" required>
+            <input type="date" id="plantingFecha" required onchange="onPlantingFechaChange()">
           </div>
+          <div id="plantingEstimacion" class="planting-estimacion hidden"></div>
           <div class="form-group">
             <label for="plantingUbicacion">Ubicación</label>
             <input type="text" id="plantingUbicacion" placeholder="Ej: Maceta balcón, Huerta trasera">
@@ -268,6 +292,7 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/firestore.js"></script>
   <script src="js/calendar.js"></script>
+  <script src="js/planificador.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>
 </body>

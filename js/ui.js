@@ -311,3 +311,127 @@ function eliminarPlanting(id) {
     showToast('Eliminado');
   }
 }
+
+// ---- SMART PLANTING FORM ----
+
+function onPlantingSelectChange() {
+  const id = document.getElementById('plantingSelect').value;
+  const info = document.getElementById('plantingInfo');
+  const est = document.getElementById('plantingEstimacion');
+  if (!id) { info.classList.add('hidden'); est.classList.add('hidden'); return; }
+  const p = getPlantaById(id);
+  if (!p) return;
+  const s = p.siembra[hemisferio];
+  const c = p.cosecha[hemisferio];
+  const evalue = evaluarFechaSiembra(p, document.getElementById('plantingFecha').value);
+  info.classList.remove('hidden');
+  info.innerHTML = `
+    <div class="plan-info-row">
+      <span>📅 <strong>Siembra:</strong> ${MESES[s.inicio-1]} - ${MESES[s.fin-1]}</span>
+      <span>🍂 <strong>Cosecha:</strong> ${MESES[c.inicio-1]} - ${MESES[c.fin-1]}</span>
+    </div>
+    <div class="plan-info-row">
+      <span>⏱️ <strong>Maduración:</strong> ~${p.diasCosecha || 90} días</span>
+      <span>${evalue.label ? `<span class="planting-badge ${evalue.cls}">${evalue.label}</span>` : ''}</span>
+    </div>
+  `;
+  onPlantingFechaChange();
+}
+
+function onPlantingFechaChange() {
+  const id = document.getElementById('plantingSelect').value;
+  const fecha = document.getElementById('plantingFecha').value;
+  const est = document.getElementById('plantingEstimacion');
+  if (!id || !fecha) { est.classList.add('hidden'); return; }
+  const p = getPlantaById(id);
+  if (!p) return;
+  const dias = p.diasCosecha || 90;
+  const fCosecha = calcularFechaCosecha(fecha, dias);
+  const evalue = evaluarFechaSiembra(p, fecha);
+  const diasRest = Math.ceil((fCosecha - new Date()) / 86400000);
+  est.classList.remove('hidden');
+  est.innerHTML = `
+    <div class="plan-info-row">
+      <span>🌱 <strong>Siembra:</strong> ${formatDate(fecha)}</span>
+      <span>🍂 <strong>Cosecha estimada:</strong> ${formatDate(fCosecha.toISOString())}</span>
+    </div>
+    <div class="plan-info-row">
+      <span>⏳ <strong>Días hasta cosecha:</strong> ~${dias} días</span>
+      <span class="planting-badge ${evalue.cls}">${evalue.label}</span>
+    </div>
+  `;
+}
+
+// ---- PLAN VIEW ----
+
+function renderPlan() {
+  document.getElementById('planBadgeEstacion').textContent = `🌿 ${getEstacionNombre(hemisferio)}`;
+  document.getElementById('planEstacionTexto').textContent =
+    `Basado en tu hemisferio (${hemisferio === 'norte' ? 'Norte' : 'Sur'}) — estación actual: ${getEstacionNombre(hemisferio)}`;
+
+  // Recomendaciones
+  const recs = getRecomendacionesAhora();
+  const grid = document.getElementById('planRecomendaciones');
+  grid.innerHTML = '';
+  if (recs.length === 0) {
+    grid.innerHTML = '<p class="plan-empty">No hay plantas recomendadas para sembrar esta temporada</p>';
+  } else {
+    recs.slice(0, 12).forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'plant-card plan-rec-card';
+      const s = p.siembra[hemisferio];
+      card.innerHTML = `
+        <div class="card-emoji">${p.emoji || '🌱'}</div>
+        <div class="card-name">${p.nombre}</div>
+        <div class="card-season">${MESES[s.inicio-1]} - ${MESES[s.fin-1]}</div>
+        <span class="planting-badge badge-creciendo">✅ Temporada</span>
+      `;
+      card.addEventListener('click', () => openPlantDetail(p.id));
+      grid.appendChild(card);
+    });
+  }
+
+  // Próximas cosechas
+  const cosechas = getProximasCosechas(10);
+  const divCosechas = document.getElementById('planProximasCosechas');
+  divCosechas.innerHTML = '';
+  if (cosechas.length === 0) {
+    divCosechas.innerHTML = '<p class="plan-empty">No tenés cultivos activos. Agregá algunos en "Cultivos"</p>';
+  } else {
+    cosechas.forEach(c => {
+      const item = document.createElement('div');
+      item.className = `planting-card planting-${c.estadoPlan === 'listo' ? 'cosechado' : ''}`;
+      const progressBar = `<div class="progress-bar"><div class="progress-fill ${c.estadoPlan === 'listo' ? 'fill-ready' : c.estadoPlan === 'pronto' ? 'fill-soon' : ''}" style="width:${c.progreso}%"></div></div>`;
+      item.innerHTML = `
+        <div class="planting-emoji">${c.emoji || '🌱'}</div>
+        <div class="planting-info">
+          <div class="planting-name">${c.nombre}</div>
+          <div class="planting-meta">
+            ${c.estadoPlan === 'listo' ? '🍂 Listo para cosechar!' :
+              c.estadoPlan === 'pronto' ? `⏰ ${c.diasRestantes} días para cosechar` :
+              `📅 Cosecha estimada: ${formatDate(c.fechaCosechaStr)} (${c.diasRestantes} días)`}
+          </div>
+          ${progressBar}
+        </div>
+      `;
+      item.addEventListener('click', () => openPlantDetail(c.plantId));
+      divCosechas.appendChild(item);
+    });
+  }
+
+  // Resumen
+  const divResumen = document.getElementById('planResumen');
+  const activos = getPlantings('creciendo').length;
+  const cosechados = getPlantings('cosechado').length;
+  const fallidos = getPlantings('fallo').length;
+  const total = activos + cosechados + fallidos;
+  divResumen.innerHTML = total === 0
+    ? '<p class="plan-empty">Sin cultivos registrados aún</p>'
+    : `
+    <div class="resumen-grid">
+      <div class="resumen-item"><span class="resumen-num">${activos}</span>🌱 Activos</div>
+      <div class="resumen-item"><span class="resumen-num">${cosechados}</span>🍂 Cosechados</div>
+      <div class="resumen-item"><span class="resumen-num">${fallidos}</span>❌ Fallidos</div>
+      <div class="resumen-item"><span class="resumen-num">${total}</span>📋 Total</div>
+    </div>`;
+}
