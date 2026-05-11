@@ -101,12 +101,26 @@ function openPlantDetail(id) {
         <h3>📝 Notas</h3>
         <p class="detail-notas">${p.notas}</p>
       </div>` : ''}
-      <div style="display:flex;gap:0.5rem;margin-top:1rem">
+      <div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap">
+        <button class="detail-wishlist ${isInWishlist(p.id) ? 'in-wishlist' : ''}" id="wishlistBtn_${p.id}" onclick="toggleWishlistDetail('${p.id}')">
+          ${isInWishlist(p.id) ? '⭐ En mis planes' : '☆ Agregar a mis planes'}
+        </button>
         <button class="detail-edit" onclick="abrirEditForm('${p.id}')">✏️ Editar</button>
         <button class="detail-delete" onclick="eliminarYcerrar('${p.id}')">🗑️ Eliminar</button>
       </div>
     </div>`;
   modal.classList.remove('hidden');
+}
+
+function toggleWishlistDetail(id) {
+  const enLista = toggleWishlist(id);
+  const btn = document.getElementById(`wishlistBtn_${id}`);
+  if (btn) {
+    btn.textContent = enLista ? '⭐ En mis planes' : '☆ Agregar a mis planes';
+    btn.classList.toggle('in-wishlist', enLista);
+  }
+  showToast(enLista ? '✅ Agregado a tu plan de siembra' : 'Eliminado de tu plan');
+  renderPlan();
 }
 
 function eliminarYcerrar(id) {
@@ -365,33 +379,75 @@ function onPlantingFechaChange() {
 // ---- PLAN VIEW ----
 
 function renderPlan() {
+  const mesActual = new Date().getMonth() + 1;
   document.getElementById('planBadgeEstacion').textContent = `🌿 ${getEstacionNombre(hemisferio)}`;
   document.getElementById('planEstacionTexto').textContent =
     `Basado en tu hemisferio (${hemisferio === 'norte' ? 'Norte' : 'Sur'}) — estación actual: ${getEstacionNombre(hemisferio)}`;
 
-  // Recomendaciones
-  const recs = getRecomendacionesAhora();
+  // ---- TUS PLANES DE SIEMBRA (wishlist) ----
+  const wishlistPlants = getWishlistPlants();
   const grid = document.getElementById('planRecomendaciones');
   grid.innerHTML = '';
-  if (recs.length === 0) {
-    grid.innerHTML = '<p class="plan-empty">No hay plantas recomendadas para sembrar esta temporada</p>';
+  document.getElementById('planRecomendacionesTitle').textContent =
+    `📋 Tus planes de siembra (${wishlistPlants.length})`;
+
+  if (wishlistPlants.length === 0) {
+    grid.innerHTML = `
+      <div class="plan-empty" style="grid-column:1/-1">
+        <p style="font-size:1.5rem;margin-bottom:0.5rem">📋</p>
+        <p>No tenés plantas en tu plan de siembra.</p>
+        <p style="font-size:0.85rem;margin-top:0.5rem;color:var(--text-secondary)">
+          Andá al <strong>Catálogo</strong>, abrí una planta y agregala a "Mis planes"
+        </p>
+      </div>`;
   } else {
-    recs.slice(0, 12).forEach(p => {
+    // Ordenar: primero las que se pueden sembrar ahora, luego por mes de siembra
+    const ordenadas = [...wishlistPlants].sort((a, b) => {
+      const aAhora = enVentanaSiembra(a);
+      const bAhora = enVentanaSiembra(b);
+      if (aAhora && !bAhora) return -1;
+      if (!aAhora && bAhora) return 1;
+      const sa = a.siembra[hemisferio];
+      const sb = b.siembra[hemisferio];
+      const da = sa.inicio >= mesActual ? sa.inicio - mesActual : sa.inicio + 12 - mesActual;
+      const db = sb.inicio >= mesActual ? sb.inicio - mesActual : sb.inicio + 12 - mesActual;
+      return da - db;
+    });
+
+    ordenadas.forEach(p => {
+      const s = p.siembra[hemisferio];
+      const ahora = enVentanaSiembra(p);
+      const mesesFaltan = ahora ? 0 : (s.inicio >= mesActual ? s.inicio - mesActual : s.inicio + 12 - mesActual);
+      const yaSembrado = getPlantings('todos').some(pl => pl.plantId === p.id && pl.estado === 'creciendo');
+      const yaCosechado = getPlantings('todos').some(pl => pl.plantId === p.id && pl.estado === 'cosechado');
+
       const card = document.createElement('div');
       card.className = 'plant-card plan-rec-card';
-      const s = p.siembra[hemisferio];
+      let badge = '';
+      if (ahora) badge = '<span class="planting-badge badge-creciendo">🌱 Sembrar ahora</span>';
+      else if (mesesFaltan <= 1) badge = `<span class="planting-badge badge-cosechado">⏰ En ${mesesFaltan === 0 ? 'este mes' : `${mesesFaltan} mes`}</span>`;
+      else badge = `<span class="planting-badge">📅 En ${mesesFaltan} meses</span>`;
+
       card.innerHTML = `
         <div class="card-emoji">${p.emoji || '🌱'}</div>
         <div class="card-name">${p.nombre}</div>
         <div class="card-season">${MESES[s.inicio-1]} - ${MESES[s.fin-1]}</div>
-        <span class="planting-badge badge-creciendo">✅ Temporada</span>
+        ${badge}
+        <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.2rem">
+          ${yaSembrado ? '🌱 Ya sembrado' : yaCosechado ? '🍂 Ya cosechado' : ''}
+        </div>
       `;
       card.addEventListener('click', () => openPlantDetail(p.id));
       grid.appendChild(card);
     });
   }
 
-  // Próximas cosechas
+  // ---- QUÉ PLANTAR AHORA (recomendaciones generales) ----
+  const recs = getRecomendacionesAhora();
+  const divRecs = document.createElement('div');
+  const recContainer = document.getElementById('planRecomendaciones').parentElement;
+
+  // ---- PRÓXIMAS COSECHAS ----
   const cosechas = getProximasCosechas(10);
   const divCosechas = document.getElementById('planProximasCosechas');
   divCosechas.innerHTML = '';
@@ -419,19 +475,20 @@ function renderPlan() {
     });
   }
 
-  // Resumen
+  // ---- RESUMEN ----
   const divResumen = document.getElementById('planResumen');
   const activos = getPlantings('creciendo').length;
   const cosechados = getPlantings('cosechado').length;
   const fallidos = getPlantings('fallo').length;
   const total = activos + cosechados + fallidos;
-  divResumen.innerHTML = total === 0
-    ? '<p class="plan-empty">Sin cultivos registrados aún</p>'
+  const enPlan = wishlistPlants.length;
+  divResumen.innerHTML = total === 0 && enPlan === 0
+    ? '<p class="plan-empty">Sin actividad aún. Agregá plantas a tu plan o registrá cultivos</p>'
     : `
     <div class="resumen-grid">
+      <div class="resumen-item"><span class="resumen-num">${enPlan}</span>📋 En plan</div>
       <div class="resumen-item"><span class="resumen-num">${activos}</span>🌱 Activos</div>
       <div class="resumen-item"><span class="resumen-num">${cosechados}</span>🍂 Cosechados</div>
       <div class="resumen-item"><span class="resumen-num">${fallidos}</span>❌ Fallidos</div>
-      <div class="resumen-item"><span class="resumen-num">${total}</span>📋 Total</div>
     </div>`;
 }

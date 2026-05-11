@@ -139,6 +139,28 @@
   color: var(--text-secondary);
 }
 
+.detail-wishlist {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.detail-wishlist:hover { background: var(--accent); color: white; }
+
+.detail-wishlist.in-wishlist {
+  background: #fff3e0;
+  border-color: var(--accent);
+  color: #e65100;
+}
+
+.detail-wishlist.in-wishlist:hover { background: var(--accent); color: white; }
+
 .detail-delete {
   padding: 0.5rem 1rem;
   border: 1px solid #e53935;
@@ -148,7 +170,6 @@
   cursor: pointer;
   font-size: 0.85rem;
   transition: all 0.2s;
-  margin-top: 0.5rem;
 }
 
 .detail-delete:hover {

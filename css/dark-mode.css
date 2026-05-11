@@ -50,6 +50,9 @@
 [data-theme="dark"] .badge-cosechado { background: rgba(255,179,0,0.15); }
 [data-theme="dark"] .badge-fallo { background: rgba(239,83,80,0.15); }
 
+[data-theme="dark"] .detail-wishlist.in-wishlist { background: #3a2a10; color: var(--accent); }
+[data-theme="dark"] .detail-wishlist.in-wishlist:hover { background: var(--accent); color: #1a1a1a; }
+
 [data-theme="dark"] .progress-bar { background: #333; }
 [data-theme="dark"] .progress-fill.fill-ready { background: #ef5350; }
 [data-theme="dark"] .resumen-item { background: #1e1e1e; }

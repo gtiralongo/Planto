@@ -205,6 +205,36 @@ function deletePlanting(id) {
   }
 }
 
+// ----- WISHLIST (planes de siembra) -----
+let wishlist = [];
+
+function initWishlist() {
+  try {
+    const stored = localStorage.getItem('planto_wishlist');
+    wishlist = stored ? JSON.parse(stored) : [];
+  } catch { wishlist = []; }
+}
+
+function saveWishlist() {
+  localStorage.setItem('planto_wishlist', JSON.stringify(wishlist));
+}
+
+function getWishlist() { return wishlist; }
+
+function isInWishlist(plantId) { return wishlist.includes(plantId); }
+
+function toggleWishlist(plantId) {
+  const idx = wishlist.indexOf(plantId);
+  if (idx >= 0) wishlist.splice(idx, 1);
+  else wishlist.push(plantId);
+  saveWishlist();
+  return idx < 0;
+}
+
+function getWishlistPlants() {
+  return wishlist.map(id => getPlantaById(id)).filter(Boolean);
+}
+
 function setHemisferio(h) {
   hemisferio = h;
   localStorage.setItem('planto_hemisphere', h);

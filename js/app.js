@@ -39,6 +39,7 @@ function enterApp() {
 
   initPlants();
   initPlantings();
+  initWishlist();
   renderCalendar();
   renderCatalog();
   renderPlantings('creciendo');
