@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planto — Calendario de Siembra</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e7d32">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/calendar.css">
+  <link rel="stylesheet" href="css/plant-card.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+  <!-- Firebase SDK (opcional para auth) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <!-- LANDING: Selección de hemisferio -->
+  <section id="landing" class="landing">
+    <div class="landing-card">
+      <div class="landing-icon">🌱</div>
+      <h1>Planto</h1>
+      <p class="landing-sub">Tu calendario personal de siembra</p>
+      <p class="landing-desc">Seleccioná tu hemisferio para ver las épocas ideales de plantación</p>
+      <div class="landing-buttons">
+        <button class="btn btn-hemisphere" data-hemisphere="norte" onclick="selectHemisphere('norte')">
+          <span class="hemi-icon">🌍</span>
+          <span>Hemisferio Norte</span>
+          <small>España, México, Colombia...</small>
+        </button>
+        <button class="btn btn-hemisphere" data-hemisphere="sur" onclick="selectHemisphere('sur')">
+          <span class="hemi-icon">🌏</span>
+          <span>Hemisferio Sur</span>
+          <small>Argentina, Chile, Uruguay...</small>
+        </button>
+      </div>
+      <button class="btn btn-gps" onclick="detectHemisphere()">
+        <span>📍</span> Usar mi ubicación
+      </button>
+      <hr class="landing-divider">
+      <button class="btn btn-google" id="landingLoginBtn" onclick="loginGoogle()">
+        <span class="google-icon">G</span> Iniciar sesión con Google
+      </button>
+      <p class="landing-auth-info">(Opcional — para sincronizar datos en el futuro)</p>
+    </div>
+  </section>
+
+  <!-- APP PRINCIPAL -->
+  <div id="app" class="app hidden">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="header-left">
+          <span class="logo">🌱 Planto</span>
+          <span class="badge-hemisphere" id="badgeHemi"></span>
+        </div>
+        <nav class="nav">
+          <button class="nav-btn active" data-view="calendar" onclick="showView('calendar')">📅 Calendario</button>
+          <button class="nav-btn" data-view="catalog" onclick="showView('catalog')">🌿 Catálogo</button>
+          <button class="nav-btn" data-view="plantings" onclick="showView('plantings')">🌱 Cultivos</button>
+          <button class="nav-btn" data-view="add" onclick="showView('add')">➕ Agregar</button>
+        </nav>
+        <div class="header-right">
+          <div id="userInfo" class="user-info hidden">
+            <img id="userAvatar" class="user-avatar" src="" alt="avatar">
+            <span id="userName" class="user-name"></span>
+          </div>
+          <button class="btn btn-login" id="loginBtn" onclick="loginGoogle()" title="Iniciar sesión">🔑</button>
+          <button class="btn btn-logout hidden" id="logoutBtn" onclick="logout()" title="Cerrar sesión">🚪</button>
+          <button class="icon-btn" onclick="toggleHemisphere()" title="Cambiar hemisferio">🔄</button>
+          <button class="icon-btn" id="toggleTheme" onclick="toggleTheme()" title="Modo oscuro">🌙</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main class="main">
+
+      <!-- VISTA: Calendario -->
+      <section id="view-calendar" class="view active">
+        <div class="calendar-header">
+          <h2>Calendario de Siembra</h2>
+          <div class="calendar-legend">
+            <span class="legend-item"><span class="legend-dot dot-sow"></span> Siembra</span>
+            <span class="legend-item"><span class="legend-dot dot-harvest"></span> Cosecha</span>
+          </div>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </section>
+
+      <!-- VISTA: Catálogo -->
+      <section id="view-catalog" class="view">
+        <div class="catalog-header">
+          <h2>Catálogo de Plantas</h2>
+          <div class="catalog-controls">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar planta..." oninput="filterPlants()">
+            <select id="filterCategory" class="filter-select" onchange="filterPlants()">
+              <option value="todas">Todas las categorías</option>
+              <option value="verdura">Verduras</option>
+              <option value="fruta">Frutas</option>
+              <option value="hierba">Hierbas</option>
+              <option value="flor">Flores</option>
+            </select>
+          </div>
+        </div>
+        <div id="catalogGrid" class="catalog-grid"></div>
+      </section>
+
+      <!-- VISTA: Agregar / Editar planta -->
+      <section id="view-add" class="view">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+          <h2 id="formTitle">Agregar Nueva Planta</h2>
+          <button id="cancelEditBtn" class="btn btn-cancel hidden" onclick="cancelEdit()">✕ Cancelar edición</button>
+        </div>
+        <form id="addForm" class="plant-form" onsubmit="addPlant(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formNombre">Nombre de la planta</label>
+              <input type="text" id="formNombre" required>
+            </div>
+            <div class="form-group">
+              <label for="formCategoria">Categoría</label>
+              <select id="formCategoria" required>
+                <option value="verdura">Verdura</option>
+                <option value="fruta">Fruta</option>
+                <option value="hierba">Hierba</option>
+                <option value="flor">Flor</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formEmoji">Emoji</label>
+              <input type="text" id="formEmoji" value="🌱" maxlength="2">
+            </div>
+            <div class="form-group">
+              <label for="formSol">Sol</label>
+              <select id="formSol">
+                <option value="pleno sol">Pleno sol</option>
+                <option value="sombra parcial">Sombra parcial</option>
+                <option value="sombra">Sombra</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formRiego">Riego</label>
+              <select id="formRiego">
+                <option value="bajo">Bajo</option>
+                <option value="moderado">Moderado</option>
+                <option value="alto">Alto</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="formSuelo">Suelo</label>
+              <input type="text" id="formSuelo" placeholder="Ej: franco, bien drenado">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formProfundidad">Profundidad de siembra</label>
+              <input type="text" id="formProfundidad" placeholder="Ej: 0.5 cm">
+            </div>
+            <div class="form-group">
+              <label for="formEspaciado">Espaciado</label>
+              <input type="text" id="formEspaciado" placeholder="Ej: 30 cm entre plantas">
+            </div>
+          </div>
+          <fieldset class="form-fieldset">
+            <legend>Época de siembra (Hemisferio Norte)</legend>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="formNorteInicio">Mes inicio</label>
+                <select id="formNorteInicio">
+                  <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                  <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                  <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                  <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="formNorteFin">Mes fin</label>
+                <select id="formNorteFin">
+                  <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                  <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                  <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                  <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+          <div class="form-group">
+            <label for="formNotas">Notas adicionales</label>
+            <textarea id="formNotas" rows="3" placeholder="Consejos de cultivo, asociaciones, etc."></textarea>
+          </div>
+          <button type="submit" class="btn btn-submit" id="formSubmitBtn">Guardar planta</button>
+        </form>
+        <p id="addSuccess" class="success-msg hidden">✅ Planta agregada correctamente</p>
+      </section>
+
+      <!-- VISTA: Mis Cultivos -->
+      <section id="view-plantings" class="view">
+        <div class="plantings-header">
+          <h2>🌱 Mis Cultivos</h2>
+          <button class="btn btn-add-planting" onclick="showAddPlanting()">➕ Agregar cultivo</button>
+        </div>
+        <div class="plantings-tabs">
+          <button class="plantings-tab active" data-tab="creciendo" onclick="switchPlantingsTab('creciendo')">🌱 Activos</button>
+          <button class="plantings-tab" data-tab="cosechado" onclick="switchPlantingsTab('cosechado')">🍂 Cosechados</button>
+          <button class="plantings-tab" data-tab="fallo" onclick="switchPlantingsTab('fallo')">❌ Fallidos</button>
+          <button class="plantings-tab" data-tab="todos" onclick="switchPlantingsTab('todos')">📋 Todos</button>
+        </div>
+        <div id="plantingsGrid" class="plantings-grid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: Detalle de planta -->
+  <div id="plantModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Agregar cultivo -->
+  <div id="plantingModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="document.getElementById('plantingModal').classList.add('hidden')"></div>
+    <div class="modal-content">
+      <button class="modal-close" onclick="document.getElementById('plantingModal').classList.add('hidden')">✕</button>
+      <div style="padding:1.5rem">
+        <h2 style="margin-bottom:1rem;color:var(--primary-dark)">🌱 Nuevo Cultivo</h2>
+        <form id="plantingForm" class="plant-form" onsubmit="guardarPlanting(event)">
+          <div class="form-group">
+            <label for="plantingSelect">Planta</label>
+            <select id="plantingSelect" required></select>
+          </div>
+          <div class="form-group">
+            <label for="plantingFecha">Fecha de siembra</label>
+            <input type="date" id="plantingFecha" required>
+          </div>
+          <div class="form-group">
+            <label for="plantingUbicacion">Ubicación</label>
+            <input type="text" id="plantingUbicacion" placeholder="Ej: Maceta balcón, Huerta trasera">
+          </div>
+          <div class="form-group">
+            <label for="plantingNotas">Notas</label>
+            <textarea id="plantingNotas" rows="2" placeholder="Observaciones…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-submit">Guardar cultivo</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/plants.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

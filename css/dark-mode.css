@@ -1,0 +1,51 @@
+[data-theme="dark"] {
+  --primary: #66bb6a;
+  --primary-light: #81c784;
+  --primary-dark: #4caf50;
+  --accent: #ffb300;
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --surface2: #2a2a2a;
+  --text: #e0e0e0;
+  --text-secondary: #999;
+  --border: #333;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .landing {
+  background: linear-gradient(135deg, #1a2a1a 0%, #121212 50%, #1a2a1a 100%);
+}
+
+[data-theme="dark"] .calendar-month.current-month {
+  box-shadow: 0 0 0 2px var(--primary-dark);
+}
+
+[data-theme="dark"] .month-plant.type-sow { background: rgba(102, 187, 106, 0.12); }
+[data-theme="dark"] .month-plant.type-sow:hover { background: rgba(102, 187, 106, 0.2); }
+[data-theme="dark"] .month-plant.type-harvest { background: rgba(255, 179, 0, 0.12); }
+[data-theme="dark"] .month-plant.type-harvest:hover { background: rgba(255, 179, 0, 0.2); }
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: var(--surface2);
+  border-color: #444;
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-gps { background: var(--primary-dark); }
+[data-theme="dark"] .btn-gps:hover { background: var(--primary); }
+
+[data-theme="dark"] .modal-backdrop { background: rgba(0,0,0,0.7); }
+
+[data-theme="dark"] .btn-google:hover { border-color: #4285f4; background: #1a2332; }
+
+[data-theme="dark"] .detail-edit { border-color: var(--primary); }
+
+[data-theme="dark"] .planting-card { border-left-color: var(--primary); }
+[data-theme="dark"] .planting-card.planting-cosechado { border-left-color: var(--accent); }
+[data-theme="dark"] .planting-card.planting-fallo { border-left-color: #ef5350; }
+
+[data-theme="dark"] .badge-creciendo { background: rgba(102,187,106,0.15); }
+[data-theme="dark"] .badge-cosechado { background: rgba(255,179,0,0.15); }
+[data-theme="dark"] .badge-fallo { background: rgba(239,83,80,0.15); }

@@ -1,0 +1,162 @@
+/* Plant Card */
+.plant-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+}
+
+.plant-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.plant-card .card-emoji { font-size: 2.5rem; }
+
+.plant-card .card-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.plant-card .card-category {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plant-card .card-season {
+  font-size: 0.78rem;
+  color: var(--primary);
+  margin-top: 0.25rem;
+}
+
+/* Plant Detail in Modal */
+.plant-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 0;
+}
+
+.plant-detail-header .detail-emoji { font-size: 3rem; }
+
+.plant-detail-header .detail-title h2 {
+  font-size: 1.5rem;
+  color: var(--primary-dark);
+}
+
+.plant-detail-header .detail-title .detail-category {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plant-detail-body { padding: 1.5rem; }
+
+.detail-section { margin-bottom: 1.25rem; }
+
+.detail-section h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.detail-item { font-size: 0.9rem; }
+
+.detail-item .label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.detail-season-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+
+.detail-season-bar .bar-label {
+  font-size: 0.8rem;
+  min-width: 50px;
+  color: var(--text-secondary);
+}
+
+.detail-season-bar .bar-track {
+  flex: 1;
+  height: 12px;
+  background: var(--surface2);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.detail-season-bar .bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+
+.bar-fill.sow-fill { background: var(--primary); }
+.bar-fill.harvest-fill { background: var(--accent); }
+
+.detail-companieras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.companiera-chip {
+  padding: 0.2rem 0.6rem;
+  background: var(--surface2);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--primary-dark);
+}
+
+.detail-notas {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.detail-delete {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e53935;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #e53935;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
+
+.detail-delete:hover {
+  background: #e53935;
+  color: white;
+}
+
+@media (max-width: 480px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .plant-detail-header { flex-direction: column; text-align: center; }
+}
