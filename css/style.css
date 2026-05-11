@@ -564,6 +564,15 @@ body {
   gap: 0.75rem;
 }
 
+.plantings-login-required {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
 .plantings-empty {
   text-align: center;
   color: var(--text-secondary);

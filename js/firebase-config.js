@@ -26,9 +26,21 @@ function initFirebase() {
       firebase.initializeApp(firebaseConfig);
     }
     firebaseInicializado = true;
-    firebase.auth().onAuthStateChanged(user => {
+    initFirestore();
+    firebase.auth().onAuthStateChanged(async user => {
       currentUser = user;
       actualizarUIAuth();
+      if (user) {
+        await fs_syncLocalToFirestore(user.uid);
+        await fs_loadFromFirestore(user.uid);
+        renderCalendar();
+        const v = document.querySelector('.view.active');
+        if (v && v.id === 'view-plantings') {
+          const t = document.querySelector('.plantings-tab.active');
+          renderPlantings(t ? t.dataset.tab : 'creciendo');
+        }
+        if (v && v.id === 'view-catalog') filterPlants();
+      }
     });
   } catch (e) {
     console.warn('Firebase no disponible:', e.message);
@@ -43,6 +55,9 @@ function actualizarUIAuth() {
   const userName = document.getElementById('userName');
   const landingLoginBtn = document.getElementById('landingLoginBtn');
 
+  const cultivosBtn = document.getElementById('navCultivosBtn');
+  const plantingsView = document.getElementById('view-plantings');
+
   if (!loginBtn) return;
 
   if (currentUser) {
@@ -52,11 +67,15 @@ function actualizarUIAuth() {
     userAvatar.src = currentUser.photoURL || '';
     userName.textContent = currentUser.displayName || 'Usuario';
     if (landingLoginBtn) landingLoginBtn.classList.add('hidden');
+    if (cultivosBtn) cultivosBtn.classList.remove('hidden');
+    if (plantingsView) plantingsView.classList.remove('hidden');
   } else {
     loginBtn.classList.remove('hidden');
     logoutBtn.classList.add('hidden');
     userInfo.classList.add('hidden');
     if (landingLoginBtn) landingLoginBtn.classList.remove('hidden');
+    if (cultivosBtn) cultivosBtn.classList.add('hidden');
+    if (plantingsView) plantingsView.classList.add('hidden');
   }
 }
 
@@ -86,4 +105,8 @@ function logout() {
 
 function getUser() {
   return currentUser;
+}
+
+function isLoggedIn() {
+  return currentUser !== null && currentUser !== undefined;
 }

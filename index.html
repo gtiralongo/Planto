@@ -13,9 +13,10 @@
   <link rel="stylesheet" href="css/calendar.css">
   <link rel="stylesheet" href="css/plant-card.css">
   <link rel="stylesheet" href="css/dark-mode.css">
-  <!-- Firebase SDK (opcional para auth) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -61,7 +62,7 @@
         <nav class="nav">
           <button class="nav-btn active" data-view="calendar" onclick="showView('calendar')">📅 Calendario</button>
           <button class="nav-btn" data-view="catalog" onclick="showView('catalog')">🌿 Catálogo</button>
-          <button class="nav-btn" data-view="plantings" onclick="showView('plantings')">🌱 Cultivos</button>
+          <button class="nav-btn" data-view="plantings" onclick="showView('plantings')" id="navCultivosBtn">🌱 Cultivos</button>
           <button class="nav-btn" data-view="add" onclick="showView('add')">➕ Agregar</button>
         </nav>
         <div class="header-right">
@@ -264,8 +265,9 @@
 
   <script src="js/data.js"></script>
   <script src="js/plants.js"></script>
-  <script src="js/calendar.js"></script>
   <script src="js/firebase-config.js"></script>
+  <script src="js/firestore.js"></script>
+  <script src="js/calendar.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>
 </body>

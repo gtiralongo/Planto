@@ -95,6 +95,10 @@ function agregarPlanta(data) {
 
   plantas.unshift(nueva);
   savePlants();
+  if (typeof isLoggedIn === 'function' && isLoggedIn() && typeof fs_addUserPlant === 'function') {
+    const u = getUser();
+    if (u) fs_addUserPlant(u.uid, nueva);
+  }
   return nueva;
 }
 
@@ -126,12 +130,20 @@ function actualizarPlanta(id, data) {
   };
   plantas[idx] = updated;
   savePlants();
+  if (typeof isLoggedIn === 'function' && isLoggedIn() && typeof fs_updateUserPlant === 'function') {
+    const u = getUser();
+    if (u) fs_updateUserPlant(u.uid, id, updated);
+  }
   return updated;
 }
 
 function eliminarPlanta(id) {
   plantas = plantas.filter(p => p.id !== id);
   savePlants();
+  if (typeof isLoggedIn === 'function' && isLoggedIn() && typeof fs_deleteUserPlant === 'function') {
+    const u = getUser();
+    if (u) fs_deleteUserPlant(u.uid, id);
+  }
 }
 
 // ----- PLANTACIONES (Mis Cultivos) -----
@@ -168,17 +180,29 @@ function addPlanting(data) {
   };
   plantings.unshift(nueva);
   savePlantings();
+  if (typeof isLoggedIn === 'function' && isLoggedIn() && typeof fs_addPlanting === 'function') {
+    const u = getUser();
+    if (u) fs_addPlanting(u.uid, nueva);
+  }
   return nueva;
 }
 
 function updatePlantingStatus(id, estado) {
   const p = plantings.find(x => x.id === id);
   if (p) { p.estado = estado; savePlantings(); }
+  if (typeof isLoggedIn === 'function' && isLoggedIn() && typeof fs_updatePlantingStatus === 'function') {
+    const u = getUser();
+    if (u) fs_updatePlantingStatus(u.uid, id, estado);
+  }
 }
 
 function deletePlanting(id) {
   plantings = plantings.filter(p => p.id !== id);
   savePlantings();
+  if (typeof isLoggedIn === 'function' && isLoggedIn() && typeof fs_deletePlanting === 'function') {
+    const u = getUser();
+    if (u) fs_deletePlanting(u.uid, id);
+  }
 }
 
 function setHemisferio(h) {

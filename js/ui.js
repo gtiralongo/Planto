@@ -198,8 +198,19 @@ function addPlant(e) {
 
 function renderPlantings(filtro) {
   const grid = document.getElementById('plantingsGrid');
-  const lista = getPlantings(filtro || 'creciendo');
   grid.innerHTML = '';
+
+  if (!isLoggedIn()) {
+    grid.innerHTML = `
+      <div class="plantings-login-required">
+        <p style="font-size:2rem;margin-bottom:0.5rem">🔒</p>
+        <p>Iniciá sesión para ver tus cultivos</p>
+        <button class="btn btn-submit" style="margin-top:1rem" onclick="loginGoogle()">Iniciar sesión con Google</button>
+      </div>`;
+    return;
+  }
+
+  const lista = getPlantings(filtro || 'creciendo');
 
   if (lista.length === 0) {
     const msj = filtro === 'creciendo' ? 'No tenés cultivos activos 🌱' :
