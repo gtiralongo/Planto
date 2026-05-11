@@ -20,7 +20,7 @@
 </head>
 <body>
 
-  <!-- LANDING: Selección de hemisferio / verificación -->
+  <!-- LANDING -->
   <section id="landing" class="landing">
     <div class="landing-card">
       <div id="landingLoading" class="landing-loading">
@@ -33,27 +33,13 @@
         <div class="landing-icon">🌱</div>
         <h1>Planto</h1>
         <p class="landing-sub">Tu calendario personal de siembra</p>
-        <p class="landing-desc">Seleccioná tu hemisferio para ver las épocas ideales de plantación</p>
-        <div class="landing-buttons">
-          <button class="btn btn-hemisphere" data-hemisphere="norte" onclick="selectHemisphere('norte')">
-            <span class="hemi-icon">🌍</span>
-            <span>Hemisferio Norte</span>
-            <small>España, México, Colombia...</small>
-          </button>
-          <button class="btn btn-hemisphere" data-hemisphere="sur" onclick="selectHemisphere('sur')">
-            <span class="hemi-icon">🌏</span>
-            <span>Hemisferio Sur</span>
-            <small>Argentina, Chile, Uruguay...</small>
-          </button>
-        </div>
-        <button class="btn btn-gps" onclick="detectHemisphere()">
-          <span>📍</span> Usar mi ubicación
-        </button>
-        <hr class="landing-divider">
+        <p class="landing-desc">Iniciá sesión para guardar tus cultivos en la nube</p>
         <button class="btn btn-google" id="landingLoginBtn" onclick="loginGoogle()">
           <span class="google-icon">G</span> Iniciar sesión con Google
         </button>
-        <p class="landing-auth-info">(Opcional — para sincronizar datos en el futuro)</p>
+        <p class="landing-auth-info">O usá la app sin cuenta — los datos se guardan localmente</p>
+        <hr class="landing-divider">
+        <button class="btn btn-continue" onclick="enterApp()">🌿 Entrar sin cuenta</button>
       </div>
     </div>
   </section>
@@ -68,10 +54,10 @@
           <span class="badge-hemisphere" id="badgeHemi"></span>
         </div>
         <nav class="nav">
-          <button class="nav-btn active" data-view="calendar" onclick="showView('calendar')">📅 Calendario</button>
-          <button class="nav-btn" data-view="catalog" onclick="showView('catalog')">🌿 Catálogo</button>
           <button class="nav-btn" data-view="plantings" onclick="showView('plantings')" id="navCultivosBtn">🌱 Cultivos</button>
           <button class="nav-btn" data-view="plan" onclick="showView('plan')">📋 Plan</button>
+          <button class="nav-btn active" data-view="calendar" onclick="showView('calendar')">📅 Calendario</button>
+          <button class="nav-btn" data-view="catalog" onclick="showView('catalog')">🌿 Catálogo</button>
         </nav>
         <!-- Bottom nav (mobile) -->
         <nav class="nav-bottom" id="navBottom">
@@ -81,38 +67,32 @@
           <button class="nav-bottom-btn active" data-view="calendar" onclick="showView('calendar')">📅<span>Calendario</span></button>
         </nav>
         <div class="header-right">
-          <div id="userInfo" class="user-info hidden" onclick="toggleUserDropdown(event)">
+          <div id="userInfo" class="user-info" onclick="toggleUserDropdown(event)">
             <img id="userAvatar" class="user-avatar" src="" alt="avatar">
             <span id="userName" class="user-name"></span>
           </div>
-          <button class="btn btn-login" id="loginBtn" onclick="loginGoogle()" title="Iniciar sesión">🔑</button>
-          <button class="btn btn-logout hidden" id="logoutBtn" onclick="logout()" title="Cerrar sesión">🚪</button>
-          <button class="icon-btn" onclick="toggleHemisphere()" title="Cambiar hemisferio">🔄</button>
-          <button class="icon-btn" id="toggleTheme" onclick="toggleTheme()" title="Modo oscuro">🌙</button>
-          <button class="icon-btn hidden" id="menuUserBtn" onclick="toggleUserDropdown(event)" title="Menú">👤</button>
+          <button class="icon-btn" id="menuUserBtn" onclick="toggleUserDropdown(event)" title="Menú">👤</button>
+          <div id="userDropdown" class="user-dropdown hidden">
+            <div class="dropdown-header hidden" id="dropdownUserInfo">
+              <img id="dropdownAvatar" class="dropdown-avatar" src="" alt="">
+              <span id="dropdownName"></span>
+            </div>
+            <div class="dropdown-item hidden" id="dropdownLoginItem" onclick="loginGoogle();document.getElementById('userDropdown').classList.add('hidden')">
+              🔑 Iniciar sesión
+            </div>
+            <div class="dropdown-item" onclick="toggleTheme()">
+              <span id="dropdownThemeIcon">🌙</span> <span id="dropdownThemeText">Modo oscuro</span>
+            </div>
+            <div class="dropdown-item" onclick="toggleHemisphere()">
+              🔄 Cambiar hemisferio
+            </div>
+            <div class="dropdown-item hidden" id="dropdownLogout" onclick="logout();document.getElementById('userDropdown').classList.add('hidden')">
+              🚪 Cerrar sesión
+            </div>
+          </div>
         </div>
       </div>
     </header>
-
-    <!-- User dropdown (mobile) -->
-    <div id="userDropdown" class="user-dropdown hidden">
-      <div class="dropdown-header hidden" id="dropdownUserInfo">
-        <img id="dropdownAvatar" class="dropdown-avatar" src="" alt="">
-        <span id="dropdownName"></span>
-      </div>
-      <div class="dropdown-item hidden" id="dropdownLoginItem" onclick="loginGoogle();document.getElementById('userDropdown').classList.add('hidden')">
-        🔑 Iniciar sesión
-      </div>
-      <div class="dropdown-item" onclick="toggleTheme()">
-        <span id="dropdownThemeIcon">🌙</span> <span id="dropdownThemeText">Modo oscuro</span>
-      </div>
-      <div class="dropdown-item" onclick="toggleHemisphere()">
-        🔄 Cambiar hemisferio <span class="dropdown-hemi" id="dropdownHemi"></span>
-      </div>
-      <div class="dropdown-item hidden" id="dropdownLogout" onclick="logout();document.getElementById('userDropdown').classList.add('hidden')">
-        🚪 Cerrar sesión
-      </div>
-    </div>
 
     <!-- CONTENIDO -->
     <main class="main">

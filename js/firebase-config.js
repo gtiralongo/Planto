@@ -15,18 +15,24 @@ const firebaseConfig = {
 
 let firebaseInicializado = false;
 let currentUser = null;
-let _onAuthReady = null;
-let _authResolved = false;
-let _authUser = null;
-function setOnAuthReady(fn) {
-  _onAuthReady = fn;
-  // Si auth ya se resolvió (antes de que app.js cargara), disparar ahora
-  if (_authResolved && _authUser) _onAuthReady(_authUser);
+
+function mostrarLanding() {
+  const landing = document.getElementById('landing');
+  if (!landing || landing.classList.contains('hidden')) return;
+  const l = document.getElementById('landingLoading');
+  const c = document.getElementById('landingContent');
+  if (l) l.classList.add('hidden');
+  if (c) c.classList.remove('hidden');
 }
 
 function initFirebase() {
   if (typeof firebase === 'undefined') {
     console.warn('Firebase SDK no cargado. Usando modo local sin auth.');
+    if (localStorage.getItem('planto_hemisphere')) {
+      if (typeof enterApp === 'function') enterApp();
+    } else {
+      mostrarLanding();
+    }
     return;
   }
   try {
@@ -35,88 +41,108 @@ function initFirebase() {
     }
     firebaseInicializado = true;
     initFirestore();
-    firebase.auth().onAuthStateChanged(async user => {
-      currentUser = user;
-      actualizarUIAuth();
-      if (user) {
-        // Cargar perfil con hemisferio guardado
-        const profile = await fs_getProfile(user.uid);
-        if (profile && profile.hemisphere) {
-          setHemisferio(profile.hemisphere);
-          hemisferio = profile.hemisphere;
+    firebase.auth().onAuthStateChanged(user => {
+      try {
+        currentUser = user;
+        actualizarUIAuth();
+        if (user) {
+          const h = localStorage.getItem('planto_hemisphere');
+          if (h) { setHemisferio(h); hemisferio = h; }
+          const landing = document.getElementById('landing');
+          if (landing && !landing.classList.contains('hidden')) {
+            if (typeof enterApp === 'function') enterApp();
+          }
+          if (typeof showView === 'function') showView('plantings');
+          fs_getProfile(user.uid).then(profile => {
+            if (profile?.hemisphere && typeof getHemisferio === 'function' && profile.hemisphere !== getHemisferio()) {
+              setHemisferio(profile.hemisphere);
+              hemisferio = profile.hemisphere;
+              const b = document.getElementById('badgeHemi');
+              if (b) b.textContent = profile.hemisphere === 'norte' ? '🌍 Norte' : '🌏 Sur';
+              if (typeof renderCalendar === 'function') renderCalendar();
+              if (typeof filterPlants === 'function') filterPlants();
+            }
+          }).catch(() => {});
+          fs_syncLocalToFirestore(user.uid).catch(() => {});
+          fs_loadFromFirestore(user.uid).catch(() => {});
+        } else {
+          if (localStorage.getItem('planto_hemisphere')) {
+            const landing = document.getElementById('landing');
+            if (landing && !landing.classList.contains('hidden')) {
+              if (typeof enterApp === 'function') enterApp();
+              if (typeof showView === 'function') showView('calendar');
+            }
+          } else {
+            // Esperar un momento por si Firebase dispara otra vez con el usuario (doble fire)
+            setTimeout(() => {
+              if (!currentUser) mostrarLanding();
+            }, 1500);
+          }
         }
-        await fs_syncLocalToFirestore(user.uid);
-        await fs_loadFromFirestore(user.uid);
-        // Notificar que auth está listo (para que app.js entre a la app)
-        _authResolved = true;
-        _authUser = user;
-        if (typeof _onAuthReady === 'function') _onAuthReady(user);
-        // Si ya estaba en la app, cambiar a Mis Cultivos
-        const landing = document.getElementById('landing');
-        if (landing && landing.classList.contains('hidden') && typeof showView === 'function') {
-          showView('plantings');
-        }
-      } else {
-        _authResolved = true;
-        _authUser = null;
-        // No logueado → mostrar landing con opciones
-        document.getElementById('landingLoading').classList.add('hidden');
-        document.getElementById('landingContent').classList.remove('hidden');
+      } catch (e) {
+        console.error('Error en auth:', e);
+        mostrarLanding();
       }
     });
   } catch (e) {
     console.warn('Firebase no disponible:', e.message);
+    mostrarLanding();
   }
 }
 
+// Fallback: si Firebase no responde en 12 seg, mostrar landing igual
+setTimeout(() => {
+  const loading = document.getElementById('landingLoading');
+  if (loading && !loading.classList.contains('hidden')) {
+    mostrarLanding();
+  }
+}, 12000);
+
 function actualizarUIAuth() {
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
   const userInfo = document.getElementById('userInfo');
   const userAvatar = document.getElementById('userAvatar');
   const userName = document.getElementById('userName');
   const landingLoginBtn = document.getElementById('landingLoginBtn');
-
-  const cultivosBtn = document.getElementById('navCultivosBtn');
-  const cultivosBottom = document.getElementById('navCultivosBottom');
-  const plantingsView = document.getElementById('view-plantings');
   const dropdownUserInfo = document.getElementById('dropdownUserInfo');
   const dropdownAvatar = document.getElementById('dropdownAvatar');
   const dropdownName = document.getElementById('dropdownName');
   const dropdownLogout = document.getElementById('dropdownLogout');
   const dropdownLoginItem = document.getElementById('dropdownLoginItem');
-  const menuUserBtn = document.getElementById('menuUserBtn');
+  const cultivosBtn = document.getElementById('navCultivosBtn');
+  const cultivosBottom = document.getElementById('navCultivosBottom');
+  const navBtns = document.querySelectorAll('.nav-btn[data-view="plan"], .nav-bottom-btn[data-view="plan"]');
+  const viewPlantings = document.getElementById('view-plantings');
+  const viewPlan = document.getElementById('view-plan');
 
-  if (!loginBtn) return;
+  if (!userInfo) return;
 
   if (currentUser) {
-    loginBtn.classList.add('hidden');
-    logoutBtn.classList.remove('hidden');
-    userInfo.classList.remove('hidden');
     userAvatar.src = currentUser.photoURL || '';
+    userAvatar.style.display = '';
     userName.textContent = currentUser.displayName || 'Usuario';
     if (dropdownUserInfo) dropdownUserInfo.classList.remove('hidden');
     if (dropdownAvatar) dropdownAvatar.src = currentUser.photoURL || '';
     if (dropdownName) dropdownName.textContent = currentUser.displayName || 'Usuario';
     if (dropdownLogout) dropdownLogout.classList.remove('hidden');
     if (dropdownLoginItem) dropdownLoginItem.classList.add('hidden');
-    if (menuUserBtn) menuUserBtn.classList.remove('hidden');
     if (landingLoginBtn) landingLoginBtn.classList.add('hidden');
     if (cultivosBtn) cultivosBtn.classList.remove('hidden');
     if (cultivosBottom) cultivosBottom.classList.remove('hidden');
-    if (plantingsView) plantingsView.classList.remove('hidden');
+    navBtns.forEach(b => b.classList.remove('hidden'));
+    if (viewPlantings) viewPlantings.classList.remove('hidden');
+    if (viewPlan) viewPlan.classList.remove('hidden');
   } else {
-    loginBtn.classList.remove('hidden');
-    logoutBtn.classList.add('hidden');
-    userInfo.classList.add('hidden');
+    userAvatar.style.display = 'none';
+    userName.textContent = '👤 Invitado';
     if (dropdownUserInfo) dropdownUserInfo.classList.add('hidden');
     if (dropdownLogout) dropdownLogout.classList.add('hidden');
     if (dropdownLoginItem) dropdownLoginItem.classList.remove('hidden');
-    if (menuUserBtn) menuUserBtn.classList.remove('hidden');
     if (landingLoginBtn) landingLoginBtn.classList.remove('hidden');
     if (cultivosBtn) cultivosBtn.classList.add('hidden');
     if (cultivosBottom) cultivosBottom.classList.add('hidden');
-    if (plantingsView) plantingsView.classList.add('hidden');
+    navBtns.forEach(b => b.classList.add('hidden'));
+    if (viewPlantings) viewPlantings.classList.add('hidden');
+    if (viewPlan) viewPlan.classList.add('hidden');
   }
 }
 

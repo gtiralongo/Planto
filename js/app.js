@@ -33,10 +33,24 @@ function detectHemisphere() {
 
 function enterApp() {
   hemisferio = getHemisferio();
+  // Si no hay hemisferio guardado, intentar detectar por geolocalización
+  if (!localStorage.getItem('planto_hemisphere') && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const h = pos.coords.latitude >= 0 ? 'norte' : 'sur';
+        setHemisferio(h);
+        hemisferio = h;
+        document.getElementById('badgeHemi').textContent = h === 'norte' ? '🌍 Norte' : '🌏 Sur';
+      },
+      () => {},
+      { timeout: 3000 }
+    );
+  }
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('badgeHemi').textContent = hemisferio === 'norte' ? '🌍 Norte' : '🌏 Sur';
 
+  if (typeof actualizarUIAuth === 'function') actualizarUIAuth();
   initPlants();
   initPlantings();
   initWishlist();
@@ -51,7 +65,6 @@ function enterApp() {
   const temaGuardado = localStorage.getItem('planto_theme');
   if (temaGuardado === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
-    document.getElementById('toggleTheme').textContent = '☀️';
   }
 }
 
@@ -59,9 +72,9 @@ function toggleUserDropdown(e) {
   e && e.stopPropagation();
   const d = document.getElementById('userDropdown');
   d.classList.toggle('hidden');
-  document.getElementById('dropdownHemi').textContent = hemisferio === 'norte' ? '🌍 Norte' : '🌏 Sur';
-  document.getElementById('dropdownThemeIcon').textContent = document.getElementById('toggleTheme').textContent;
-  document.getElementById('dropdownThemeText').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo claro' : 'Modo oscuro';
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('dropdownThemeIcon').textContent = isDark ? '☀️' : '🌙';
+  document.getElementById('dropdownThemeText').textContent = isDark ? 'Modo claro' : 'Modo oscuro';
 }
 
 // Cerrar dropdown al tocar fuera
@@ -114,19 +127,9 @@ function toggleTheme() {
   const nuevo = current === 'dark' ? 'light' : 'dark';
   html.setAttribute('data-theme', nuevo);
   localStorage.setItem('planto_theme', nuevo);
-  document.getElementById('toggleTheme').textContent = nuevo === 'dark' ? '☀️' : '🌙';
 }
 
-// ---- Auth ready: si ya hay sesión, entrar directo a la app ----
-if (typeof setOnAuthReady === 'function') {
-  setOnAuthReady(async (user) => {
-    const landing = document.getElementById('landing');
-    if (landing && !landing.classList.contains('hidden')) {
-      enterApp();
-      showView('plantings');
-    }
-  });
-}
+if (typeof actualizarUIAuth === 'function') actualizarUIAuth();
 
 // ---- PWA ----
 if ('serviceWorker' in navigator) {
