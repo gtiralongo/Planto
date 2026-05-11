@@ -117,6 +117,16 @@ function toggleTheme() {
   document.getElementById('toggleTheme').textContent = nuevo === 'dark' ? '☀️' : '🌙';
 }
 
+// ---- Auth ready: si ya hay sesión, entrar directo a la app ----
+if (typeof setOnAuthReady === 'function') {
+  setOnAuthReady(async (user) => {
+    const landing = document.getElementById('landing');
+    if (landing && !landing.classList.contains('hidden')) {
+      enterApp();
+    }
+  });
+}
+
 // ---- PWA ----
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

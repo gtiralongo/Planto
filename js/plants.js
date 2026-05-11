@@ -238,6 +238,10 @@ function getWishlistPlants() {
 function setHemisferio(h) {
   hemisferio = h;
   localStorage.setItem('planto_hemisphere', h);
+  if (typeof isLoggedIn === 'function' && isLoggedIn() && typeof fs_saveProfile === 'function') {
+    const u = getUser();
+    if (u) fs_saveProfile(u.uid, { hemisphere: h });
+  }
 }
 
 function getHemisferio() {

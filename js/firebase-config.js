@@ -15,6 +15,14 @@ const firebaseConfig = {
 
 let firebaseInicializado = false;
 let currentUser = null;
+let _onAuthReady = null;
+let _authResolved = false;
+let _authUser = null;
+function setOnAuthReady(fn) {
+  _onAuthReady = fn;
+  // Si auth ya se resolvió (antes de que app.js cargara), disparar ahora
+  if (_authResolved && _authUser) _onAuthReady(_authUser);
+}
 
 function initFirebase() {
   if (typeof firebase === 'undefined') {
@@ -31,15 +39,24 @@ function initFirebase() {
       currentUser = user;
       actualizarUIAuth();
       if (user) {
+        // Cargar perfil con hemisferio guardado
+        const profile = await fs_getProfile(user.uid);
+        if (profile && profile.hemisphere) {
+          setHemisferio(profile.hemisphere);
+          hemisferio = profile.hemisphere;
+        }
         await fs_syncLocalToFirestore(user.uid);
         await fs_loadFromFirestore(user.uid);
-        renderCalendar();
-        const v = document.querySelector('.view.active');
-        if (v && v.id === 'view-plantings') {
-          const t = document.querySelector('.plantings-tab.active');
-          renderPlantings(t ? t.dataset.tab : 'creciendo');
-        }
-        if (v && v.id === 'view-catalog') filterPlants();
+        // Notificar que auth está listo (para que app.js entre a la app)
+        _authResolved = true;
+        _authUser = user;
+        if (typeof _onAuthReady === 'function') _onAuthReady(user);
+      } else {
+        _authResolved = true;
+        _authUser = null;
+        // No logueado → mostrar landing con opciones
+        document.getElementById('landingLoading').classList.add('hidden');
+        document.getElementById('landingContent').classList.remove('hidden');
       }
     });
   } catch (e) {

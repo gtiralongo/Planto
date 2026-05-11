@@ -59,6 +59,19 @@ async function fs_deletePlanting(uid, id) {
   await db.collection('users').doc(uid).collection('plantings').doc(id).delete();
 }
 
+// ---- PERFIL DE USUARIO ----
+
+async function fs_saveProfile(uid, data) {
+  if (!db) return;
+  await db.collection('users').doc(uid).set(data, { merge: true });
+}
+
+async function fs_getProfile(uid) {
+  if (!db) return null;
+  const doc = await db.collection('users').doc(uid).get();
+  return doc.exists ? doc.data() : null;
+}
+
 // ---- SINCRONIZACIÓN ----
 
 async function fs_syncLocalToFirestore(uid) {

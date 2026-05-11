@@ -20,33 +20,41 @@
 </head>
 <body>
 
-  <!-- LANDING: Selección de hemisferio -->
+  <!-- LANDING: Selección de hemisferio / verificación -->
   <section id="landing" class="landing">
     <div class="landing-card">
-      <div class="landing-icon">🌱</div>
-      <h1>Planto</h1>
-      <p class="landing-sub">Tu calendario personal de siembra</p>
-      <p class="landing-desc">Seleccioná tu hemisferio para ver las épocas ideales de plantación</p>
-      <div class="landing-buttons">
-        <button class="btn btn-hemisphere" data-hemisphere="norte" onclick="selectHemisphere('norte')">
-          <span class="hemi-icon">🌍</span>
-          <span>Hemisferio Norte</span>
-          <small>España, México, Colombia...</small>
-        </button>
-        <button class="btn btn-hemisphere" data-hemisphere="sur" onclick="selectHemisphere('sur')">
-          <span class="hemi-icon">🌏</span>
-          <span>Hemisferio Sur</span>
-          <small>Argentina, Chile, Uruguay...</small>
-        </button>
+      <div id="landingLoading" class="landing-loading">
+        <div class="landing-icon">🌱</div>
+        <h1>Planto</h1>
+        <p class="landing-desc">Verificando sesión...</p>
+        <div class="spinner"></div>
       </div>
-      <button class="btn btn-gps" onclick="detectHemisphere()">
-        <span>📍</span> Usar mi ubicación
-      </button>
-      <hr class="landing-divider">
-      <button class="btn btn-google" id="landingLoginBtn" onclick="loginGoogle()">
-        <span class="google-icon">G</span> Iniciar sesión con Google
-      </button>
-      <p class="landing-auth-info">(Opcional — para sincronizar datos en el futuro)</p>
+      <div id="landingContent" class="landing-content hidden">
+        <div class="landing-icon">🌱</div>
+        <h1>Planto</h1>
+        <p class="landing-sub">Tu calendario personal de siembra</p>
+        <p class="landing-desc">Seleccioná tu hemisferio para ver las épocas ideales de plantación</p>
+        <div class="landing-buttons">
+          <button class="btn btn-hemisphere" data-hemisphere="norte" onclick="selectHemisphere('norte')">
+            <span class="hemi-icon">🌍</span>
+            <span>Hemisferio Norte</span>
+            <small>España, México, Colombia...</small>
+          </button>
+          <button class="btn btn-hemisphere" data-hemisphere="sur" onclick="selectHemisphere('sur')">
+            <span class="hemi-icon">🌏</span>
+            <span>Hemisferio Sur</span>
+            <small>Argentina, Chile, Uruguay...</small>
+          </button>
+        </div>
+        <button class="btn btn-gps" onclick="detectHemisphere()">
+          <span>📍</span> Usar mi ubicación
+        </button>
+        <hr class="landing-divider">
+        <button class="btn btn-google" id="landingLoginBtn" onclick="loginGoogle()">
+          <span class="google-icon">G</span> Iniciar sesión con Google
+        </button>
+        <p class="landing-auth-info">(Opcional — para sincronizar datos en el futuro)</p>
+      </div>
     </div>
   </section>
 
