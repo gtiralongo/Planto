@@ -43,6 +43,7 @@ function enterApp() {
   renderCalendar();
   renderCatalog();
   renderPlantings('creciendo');
+  renderPlantingsSuggestions();
   renderPlan();
 
   setTimeout(() => mostrarNotificaciones(), 1500);
@@ -63,6 +64,7 @@ function showView(vista) {
   if (vista === 'calendar') renderCalendar();
   if (vista === 'catalog') filterPlants();
   if (vista === 'plantings') {
+    renderPlantingsSuggestions();
     const activeTab = document.querySelector('.plantings-tab.active');
     renderPlantings(activeTab ? activeTab.dataset.tab : 'creciendo');
   }

@@ -210,6 +210,80 @@ function addPlant(e) {
 
 // ---- MIS CULTIVOS ----
 
+function renderPlantingsSuggestions() {
+  const div = document.getElementById('plantingsSuggestions');
+  if (!div) return;
+  div.innerHTML = '';
+
+  const wishlistPlants = getWishlistPlants();
+  const ahora = wishlistPlants.filter(p => enVentanaSiembra(p));
+
+  // También mostrar recomendaciones generales si no hay wishlist
+  if (wishlistPlants.length === 0) {
+    const generales = getRecomendacionesAhora();
+    if (generales.length === 0) return;
+    div.innerHTML = `
+      <div class="suggestion-banner">
+        <div class="suggestion-header" onclick="this.parentElement.classList.toggle('collapsed')">
+          <span>🌿 Sugerencias de temporada (${generales.length})</span>
+          <span class="suggestion-toggle">▼</span>
+        </div>
+        <div class="suggestion-body">
+          ${generales.slice(0, 6).map(p => `
+            <div class="suggestion-chip" onclick="openPlantDetail('${p.id}')">
+              ${p.emoji} ${p.nombre}
+            </div>
+          `).join('')}
+          ${generales.length > 6 ? `<div class="suggestion-chip" onclick="showView('plan')">➕ Ver todas (${generales.length})</div>` : ''}
+        </div>
+      </div>`;
+    return;
+  }
+
+  if (ahora.length === 0) {
+    div.innerHTML = `
+      <div class="suggestion-banner collapsed">
+        <div class="suggestion-header" onclick="this.parentElement.classList.toggle('collapsed')">
+          <span>📋 Tus planes — nada que sembrar por ahora</span>
+          <span class="suggestion-toggle">▼</span>
+        </div>
+        <div class="suggestion-body">
+          <p class="suggestion-empty">Revisá tu <a href="#" onclick="showView('plan');return false">Plan</a> para ver cuándo toca cada planta</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  div.innerHTML = `
+    <div class="suggestion-banner">
+      <div class="suggestion-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>🌱 ${ahora.length} planta${ahora.length > 1 ? 's' : ''} de tu plan están en temporada</span>
+        <span class="suggestion-toggle">▼</span>
+      </div>
+      <div class="suggestion-body">
+        ${ahora.slice(0, 8).map(p => `
+          <div class="suggestion-chip suggestion-action" onclick="sembrarDesdeSugerencia('${p.id}')">
+            ${p.emoji} ${p.nombre} <small>Sembrar</small>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+function sembrarDesdeSugerencia(plantId) {
+  const p = getPlantaById(plantId);
+  if (!p) return;
+  showAddPlanting();
+  // Pre-seleccionar la planta en el modal
+  setTimeout(() => {
+    const select = document.getElementById('plantingSelect');
+    if (select) {
+      select.value = plantId;
+      onPlantingSelectChange();
+    }
+  }, 100);
+}
+
 function renderPlantings(filtro) {
   const grid = document.getElementById('plantingsGrid');
   grid.innerHTML = '';
