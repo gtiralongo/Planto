@@ -4,12 +4,13 @@
 // 3. Activá Authentication → Google en la sección "Sign-in method"
 // 4. Copiá el objeto firebaseConfig y reemplazá los valores abajo
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROYECTO",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyDJ_HApl_fe7KGxS3O_eRvofxC2r3fzK1Q",
+  authDomain: "planto-7f170.firebaseapp.com",
+  projectId: "planto-7f170",
+  storageBucket: "planto-7f170.firebasestorage.app",
+  messagingSenderId: "992661682428",
+  appId: "1:992661682428:web:88d084485caf87f00abf79",
+  measurementId: "G-DZLRZ9W4XF"
 };
 
 let firebaseInicializado = false;
